@@ -23,7 +23,6 @@
   /* surfaces */
   --paper:       #FBF8F3;
   --sand:        #F1E9DC;
-  --sand-deep:   #E9DFCE;
   --plate:       #EFE7D9;
 
   /* ink */
@@ -59,6 +58,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* replaces the default blue flash on tap with something on-palette */
+  -webkit-tap-highlight-color: rgba(36, 33, 29, 0.055);
 }
 body {
   margin: 0;
@@ -102,7 +103,8 @@ a { color: inherit; text-decoration: none; }
   border-radius: 0 0 6px 6px;
   transition: transform 260ms var(--ease);
 }
-.skip-link:focus-visible { transform: translate(-50%, 0); outline-offset: -4px; }
+/* :focus, not :focus-visible — a skip link must appear however it was reached. */
+.skip-link:focus { transform: translate(-50%, 0); outline-offset: -4px; }
 
 /* ---------- Layout primitives ---------- */
 .wrap {
@@ -411,7 +413,6 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    HOW TO BUY — steps
    ============================================================ */
-.steps { counter-reset: step; }
 .step {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -561,6 +562,7 @@ a { color: inherit; text-decoration: none; }
   .link-row:hover .link-row__arrow { transform: translateX(6px); color: var(--red); }
 }
 .link-row:focus-visible { outline-offset: 2px; }
+.link-row:active .link-row__name { color: var(--red); }
 
 /* ============================================================
    FOOTER
@@ -610,6 +612,23 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    MOTION
    ============================================================ */
+/* The hero's entrance is a pure CSS animation: it starts at first paint rather
+   than waiting for JavaScript, it still plays with JavaScript disabled, and it
+   never parks the page at opacity 0 — which is what stops the browser
+   recording First Contentful Paint at all. */
+@keyframes enter-rise {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+[data-enter] {
+  animation: enter-rise 760ms var(--ease-soft) backwards;
+  animation-delay: calc(var(--d, 0) * 80ms);
+}
+/* The portrait deliberately has no entrance: it is the largest contentful
+   element, so it anchors the first painted frame while the words rise into
+   place around it. Fading it in would drag Largest Contentful Paint out to
+   the end of that fade. */
+
 .js [data-reveal] {
   opacity: 0;
   transform: translate3d(0, 16px, 0);
@@ -625,8 +644,48 @@ a { color: inherit; text-decoration: none; }
   transform: translate3d(0, 0, 0);
 }
 
+/* ============================================================
+   PRINT
+   Reveal state is opacity-based, so without this a printed page
+   comes out almost entirely blank.
+   ============================================================ */
+@media print {
+  @page { margin: 16mm; }
+
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  [data-enter] { animation: none !important; }
+  .plate__img { transform: none !important; }
+
+  html, body { background: #fff; color: #000; }
+  .skip-link, .link-row__arrow { display: none !important; }
+
+  .hero, .section--sand { background: none; }
+  .hero, .section { padding-block: 22pt; }
+  .plate { box-shadow: none; background: none; }
+  .btn { border-color: #666; box-shadow: none; }
+  .btn--solid { background: none; color: #000; }
+
+  .plate, .step, .phase, .fact, .links li, .hero__grid { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+
+  /* a printout is offline — spell the destinations out */
+  .link-row::after {
+    content: attr(href);
+    grid-column: 1 / -1;
+    margin-top: 3pt;
+    font-size: 8.5pt;
+    letter-spacing: 0;
+    color: #444;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  [data-enter] { animation: none !important; }
   .js [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
   .plate__img { transform: none !important; }
   *, *::before, *::after {
