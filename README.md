@@ -55,9 +55,11 @@ assets/
 - **Contract address** — `index.html`, the `.ca` block in the *How to buy* section.
   Replace `Coming soon` with the address once it exists.
 - **Links** — Telegram and X URLs appear in the hero and in the *Community* section.
-- **Share image** — `og:image` and `twitter:image` in the `<head>` are relative paths.
-  Telegram and X want absolute ones, so once the site has a real address, change both
-  to `https://yourdomain.com/assets/og-image.jpg` or previews may not render.
+- **Site address** — four tags in the `<head>` hold the full URL: `canonical`, `og:url`,
+  `og:image` and `twitter:image`. They currently read
+  `https://awkward-dog-coin.vercel.app`. Change all four together when a custom domain
+  goes live — Telegram and X refuse relative share images, so a stale value here means
+  no link preview.
 - **Colours, spacing, motion** — the `:root` custom properties at the top of `styles.css`.
 
 Assets are served with a week-long cache. If you replace an image, give the new file a
