@@ -154,6 +154,7 @@ a { color: inherit; text-decoration: none; }
    first line of its section's content. Values are measured, not guessed. */
 @media (min-width: 900px) {
   .eyebrow { padding-top: var(--eyebrow-top, 0px); }
+  #launch   { --eyebrow-top: 1.75px; }
   #about    { --eyebrow-top: 5.4px; }
   #token    { --eyebrow-top: 9.55px; }
   #buy      { --eyebrow-top: 1.3px; }
@@ -370,6 +371,27 @@ a { color: inherit; text-decoration: none; }
   /* Below the measure it fills the column edge-to-edge; above it, it centres. */
   .plate { aspect-ratio: 1 / 0.94; max-width: 560px; }
   .plate__img { width: 94%; }
+}
+
+/* ============================================================
+   LAUNCH — date and notice
+   ============================================================ */
+.launch__date {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(1.625rem, 1.2rem + 1.95vw, 2.5rem);
+  line-height: 1.2;
+  letter-spacing: 0.13em;
+  color: var(--ink);
+}
+.launch__notice {
+  margin-top: clamp(30px, 3.6vw, 44px);
+  font-size: 0.8125rem;
+  line-height: 1.95;
+  letter-spacing: 0.012em;
+  color: var(--ink-3);
+  max-width: 54ch;
+  text-wrap: pretty;
 }
 
 /* ============================================================
