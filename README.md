@@ -52,8 +52,20 @@ assets/
 
 ## Editing content
 
-- **Contract address** — `index.html`, the `.ca` block in the *How to buy* section.
-  Replace `Coming soon` with the address once it exists.
+- **Contract address** — appears in exactly **two** places in `index.html`: the `.ca`
+  block in *Launch* and the one in step 03 of *How to buy*. To publish it, in **both**:
+  replace the `.ca__value` text with the address, and delete the `data-ca-empty`
+  attribute from the `.ca` element. The copy button reveals itself once that attribute
+  is gone; while it is present the button stays hidden and refuses to copy, so a
+  placeholder can never reach someone's clipboard.
+
+  The two must stay byte-identical — two addresses that disagree is how people get
+  robbed. `scripts` are not set up here, but the check is one line in the console:
+  `[...document.querySelectorAll('[data-ca-value]')].map(e => e.textContent.trim())`
+  should return the same string twice.
+
+  The notice under the launch date says *"there is no contract yet"* — remember to
+  rewrite it at the same time, or the page will contradict itself.
 - **Links** — Telegram and X URLs appear in the hero and in the *Community* section.
 - **Site address** — four tags in the `<head>` hold the full URL: `canonical`, `og:url`,
   `og:image` and `twitter:image`. They currently read

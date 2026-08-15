@@ -100,9 +100,91 @@
     window.addEventListener('resize', onScroll, { passive: true });
   }
 
+  /* ---------------------------------------------------------
+     Contract address — copy to clipboard.
+     --------------------------------------------------------- */
+  function legacyCopy(text) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var done = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return done;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function writeClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(
+        function () { return true; },
+        function () { return legacyCopy(text); }
+      );
+    }
+    return Promise.resolve(legacyCopy(text));
+  }
+
+  // Last resort: put the address under the caret so the reader can copy it by
+  // hand rather than transcribe 44 characters of base58.
+  function selectText(el) {
+    try {
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } catch (e) { /* selection is a courtesy, never a requirement */ }
+  }
+
+  function initCopy() {
+    var status = document.getElementById('ca-status');
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ca]'), function (block) {
+      var btn = block.querySelector('[data-ca-copy]');
+      var valueEl = block.querySelector('[data-ca-value]');
+      if (!btn || !valueEl) return;
+
+      var idle = btn.textContent;
+      var timer;
+
+      btn.addEventListener('click', function () {
+        // Guard rather than trust the markup: never copy the placeholder.
+        if (block.hasAttribute('data-ca-empty')) return;
+        var text = (valueEl.textContent || '').trim();
+        if (!text) return;
+
+        writeClipboard(text).then(function (copied) {
+          window.clearTimeout(timer);
+          if (copied) {
+            btn.textContent = 'Copied';
+            btn.setAttribute('data-copied', '');
+            if (status) status.textContent = 'Contract address copied';
+          } else {
+            selectText(valueEl);
+            btn.textContent = 'Select';
+            if (status) status.textContent = 'Could not copy automatically. The address is selected.';
+          }
+          timer = window.setTimeout(function () {
+            btn.textContent = idle;
+            btn.removeAttribute('data-copied');
+            if (status) status.textContent = '';
+          }, 1800);
+        });
+      });
+    });
+  }
+
   function boot() {
     initReveals();
     initParallax();
+    initCopy();
   }
 
   if (document.readyState === 'loading') {
